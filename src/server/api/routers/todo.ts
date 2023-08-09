@@ -6,15 +6,7 @@ import {
 } from "~/server/api/trpc";
 
 export const todoRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
-
-  getAllForCurrentUser: publicProcedure
+  getAllForCurrentUser: protectedProcedure
     .input(z.object({ userId: z.string() }))
     .query(({ ctx, input }) => {
       return ctx.prisma.todo.findMany({
@@ -27,7 +19,7 @@ export const todoRouter = createTRPCRouter({
       });
     }),
 
-  addTodo: publicProcedure
+  addTodo: protectedProcedure
     .input(z.object({ title: z.string(), userId: z.string() })).mutation(async ({ ctx, input }) => {
       const todo = await ctx.prisma.todo.create({
         data: {
@@ -38,7 +30,7 @@ export const todoRouter = createTRPCRouter({
       return todo;
     }),
 
-  toggleCompleted: publicProcedure
+  toggleCompleted: protectedProcedure
     .input(z.object({ id: z.string(), completed: z.boolean() })).mutation(async ({ ctx, input }) => {
       const todo = await ctx.prisma.todo.update({
         where: {
@@ -51,7 +43,7 @@ export const todoRouter = createTRPCRouter({
       return todo;
     }),
 
-  deleteTodo: publicProcedure
+  deleteTodo: protectedProcedure
     .input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
       const todo = await ctx.prisma.todo.delete({
         where: {
@@ -60,8 +52,4 @@ export const todoRouter = createTRPCRouter({
       });
       return todo;
     }),
-
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
 });
